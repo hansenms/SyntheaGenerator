@@ -1,0 +1,20 @@
+{
+    "Authority":  {
+        "value":  "https://login.microsoftonline.com/microsoft.onmicrosoft.com/"
+    },
+    "ClientId":  {
+        "value":  "CLIENT-ID"
+    },
+    "ClientSecret":  {
+        "value":  "CLIENT-SECRET"
+    },
+    "Audience":  {
+        "value":  "https://my-fhir-server.com"
+    },
+    "NumberOfPatients":  {
+        "value":  100
+    },
+    "FhirServerUrl":  {
+        "value":  "https://my-fhir-server.com/"
+    }
+}
