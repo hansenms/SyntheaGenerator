@@ -1,0 +1,105 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Authority": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure Active Directory Authority"
+            },
+            "defaultValue": "https://login.microsoftonline.com/microsoft.onmicrosoft.com/"
+        },
+        "ClientId": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure Active Directory Client Id"
+            }
+        },
+        "ClientSecret": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure Active Directory Client Secret"
+            }
+        },
+        "Audience": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure Active Directory FHIR API App (ID or URI)"
+            }
+        },
+        "NumberOfPatients": {
+            "type": "int",
+            "metadata": {
+                "description": "Number of Patients to Generate"
+            }
+        },
+        "FhirServerUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "FHIR Server URL"
+            }
+        },
+        "DockerImage": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of Docker Image"
+            },
+            "defaultValue": "hansenms/syntheagenerator:latest"
+        }
+    },
+    "resources": [
+        {
+            "name": "SyntheaGenerator",
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2018-02-01-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "containers": [
+                    {
+                        "name": "etcshare",
+                        "properties": {
+                            "image": "[parameters('DockerImage')]",
+                            "command": [
+                                "bash", "-c", "./generate_and_upload.sh"
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "AzureAD:ClientId",
+                                    "value": "[parameters('ClientId')]"
+                                },
+                                {
+                                    "name": "AzureAD:ClientSecret",
+                                    "value": "[parameters('ClientSecret')]"
+                                },
+                                {
+                                    "name": "AzureAD:Audience",
+                                    "value": "[parameters('Audience')]"
+                                },
+                                {
+                                    "name": "AzureAD:Authority",
+                                    "value": "[parameters('Authority')]"
+                                },
+                                {
+                                    "name": "NUMBER_OF_PATIENTS",
+                                    "value": "[parameters('NumberOfPatients')]"
+                                },
+                                {
+                                    "name": "FHIR_SERVER_URL",
+                                    "value": "[parameters('FhirServerUrl')]"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "cpu": "2",
+                                    "memoryInGb": "4"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "restartPolicy": "OnFailure",
+                "osType": "Linux"
+            }
+        }
+    ]
+}

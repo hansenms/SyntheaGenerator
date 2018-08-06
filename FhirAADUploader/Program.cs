@@ -47,24 +47,6 @@ namespace FhirAADUploader
             Console.WriteLine($"Azure AD Client ID  : {Configuration["AzureAD:ClientId"]}");
             Console.WriteLine($"Azure AD Audience   : {Configuration["AzureAD:Audience"]}");
 
-            authContext = new AuthenticationContext(Configuration["AzureAD:Authority"]);
-
-            ClientCredential clientCredential = new ClientCredential(Configuration["AzureAD:ClientId"], Configuration["AzureAD:ClientSecret"]); ;
-
-            AuthenticationResult result = null;
-            try
-            {
-                result = authContext.AcquireTokenAsync(Configuration["AzureAD:Audience"], clientCredential).Result;
-            }
-            catch (Exception ee)
-            {
-                Console.WriteLine(
-                    String.Format("An error occurred while acquiring a token\nTime: {0}\nError: {1}\n",
-                    DateTime.Now.ToString(),
-                    ee.ToString()));
-                return;
-            }
-
             DirectoryInfo dir = new DirectoryInfo(fhirResourcePath);
             FileInfo[] files = null;
             try
@@ -78,6 +60,24 @@ namespace FhirAADUploader
             catch (DirectoryNotFoundException e)
             {
                 Console.WriteLine(e.Message);
+                return;
+            }
+
+            authContext = new AuthenticationContext(Configuration["AzureAD:Authority"]);
+
+            ClientCredential clientCredential = new ClientCredential(Configuration["AzureAD:ClientId"], Configuration["AzureAD:ClientSecret"]); ;
+
+            AuthenticationResult authResult = null;
+            try
+            {
+                authResult = authContext.AcquireTokenAsync(Configuration["AzureAD:Audience"], clientCredential).Result;
+            }
+            catch (Exception ee)
+            {
+                Console.WriteLine(
+                    String.Format("An error occurred while acquiring a token\nTime: {0}\nError: {1}\n",
+                    DateTime.Now.ToString(),
+                    ee.ToString()));
                 return;
             }
 
@@ -100,7 +100,11 @@ namespace FhirAADUploader
                         using (var client = new HttpClient())
                         {
                             client.BaseAddress = new Uri(fhirServerUrl);
-                            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + result.AccessToken);
+                            
+                            //If we already have a token, we should get the cached one, otherwise, refresh
+                            authResult = authContext.AcquireTokenAsync(Configuration["AzureAD:Audience"], clientCredential).Result;
+
+                            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + authResult.AccessToken);
                             StringContent content = new StringContent(entry_json, Encoding.UTF8, "application/json");
                             var postresult = await client.PostAsync($"/{resource_type}", content);
                             if (!postresult.IsSuccessStatusCode)
