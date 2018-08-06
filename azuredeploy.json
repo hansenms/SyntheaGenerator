@@ -65,19 +65,19 @@
                             ],
                             "environmentVariables": [
                                 {
-                                    "name": "AzureAD:ClientId",
+                                    "name": "AzureAD_ClientId",
                                     "value": "[parameters('ClientId')]"
                                 },
                                 {
-                                    "name": "AzureAD:ClientSecret",
+                                    "name": "AzureAD_ClientSecret",
                                     "value": "[parameters('ClientSecret')]"
                                 },
                                 {
-                                    "name": "AzureAD:Audience",
+                                    "name": "AzureAD_Audience",
                                     "value": "[parameters('Audience')]"
                                 },
                                 {
-                                    "name": "AzureAD:Authority",
+                                    "name": "AzureAD_Authority",
                                     "value": "[parameters('Authority')]"
                                 },
                                 {

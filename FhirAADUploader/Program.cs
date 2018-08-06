@@ -43,9 +43,9 @@ namespace FhirAADUploader
 
             Console.WriteLine($"FHIR Resource Path  : {fhirResourcePath}");
             Console.WriteLine($"FHIR Server URL     : {fhirServerUrl}");
-            Console.WriteLine($"Azure AD Authority  : {Configuration["AzureAD:Authority"]}");
-            Console.WriteLine($"Azure AD Client ID  : {Configuration["AzureAD:ClientId"]}");
-            Console.WriteLine($"Azure AD Audience   : {Configuration["AzureAD:Audience"]}");
+            Console.WriteLine($"Azure AD Authority  : {Configuration["AzureAD_Authority"]}");
+            Console.WriteLine($"Azure AD Client ID  : {Configuration["AzureAD_ClientId"]}");
+            Console.WriteLine($"Azure AD Audience   : {Configuration["AzureAD_Audience"]}");
 
             DirectoryInfo dir = new DirectoryInfo(fhirResourcePath);
             FileInfo[] files = null;
@@ -63,14 +63,14 @@ namespace FhirAADUploader
                 return;
             }
 
-            authContext = new AuthenticationContext(Configuration["AzureAD:Authority"]);
+            authContext = new AuthenticationContext(Configuration["AzureAD_Authority"]);
 
-            ClientCredential clientCredential = new ClientCredential(Configuration["AzureAD:ClientId"], Configuration["AzureAD:ClientSecret"]); ;
+            ClientCredential clientCredential = new ClientCredential(Configuration["AzureAD_ClientId"], Configuration["AzureAD_ClientSecret"]); ;
 
             AuthenticationResult authResult = null;
             try
             {
-                authResult = authContext.AcquireTokenAsync(Configuration["AzureAD:Audience"], clientCredential).Result;
+                authResult = authContext.AcquireTokenAsync(Configuration["AzureAD_Audience"], clientCredential).Result;
             }
             catch (Exception ee)
             {
@@ -102,7 +102,7 @@ namespace FhirAADUploader
                             client.BaseAddress = new Uri(fhirServerUrl);
                             
                             //If we already have a token, we should get the cached one, otherwise, refresh
-                            authResult = authContext.AcquireTokenAsync(Configuration["AzureAD:Audience"], clientCredential).Result;
+                            authResult = authContext.AcquireTokenAsync(Configuration["AzureAD_Audience"], clientCredential).Result;
 
                             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + authResult.AccessToken);
                             StringContent content = new StringContent(entry_json, Encoding.UTF8, "application/json");

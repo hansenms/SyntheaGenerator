@@ -12,8 +12,8 @@ The Azure Active Directory authentication and FHIR server upload is handled by t
 To generate 100 patients and upload them to a FHIR server with URL `https://my-fhir-server.com`:
 
 ```
-docker run --name synthea --rm -t -e AzureAD:ClientSecret='AAD-CLIENT-SECRET' -e AzureAD:ClientId='AAD-CLIENT-ID' -e AzureAD:Authority='https
-://login.microsoftonline.com/TENANT-ID/' -e AzureAD:Audience='AAD-FHIR-API-APP-ID' -e NUMBER_OF_PATIENTS='100' -e FHIR_SERVER_URL='https://my-fhir-server/com/' hansenms/s
+docker run --name synthea --rm -t -e AzureAD_ClientSecret='AAD-CLIENT-SECRET' -e AzureAD_ClientId='AAD-CLIENT-ID' -e AzureAD_Authority='https
+://login.microsoftonline.com/TENANT-ID/' -e AzureAD_Audience='AAD-FHIR-API-APP-ID' -e NUMBER_OF_PATIENTS='100' -e FHIR_SERVER_URL='https://my-fhir-server/com/' hansenms/s
 ynthegenerator
 ```
 
