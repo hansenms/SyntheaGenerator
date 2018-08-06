@@ -57,7 +57,7 @@
             "properties": {
                 "containers": [
                     {
-                        "name": "etcshare",
+                        "name": "syntheagenerator",
                         "properties": {
                             "image": "[parameters('DockerImage')]",
                             "command": [
@@ -91,8 +91,8 @@
                             ],
                             "resources": {
                                 "requests": {
-                                    "cpu": "2",
-                                    "memoryInGb": "4"
+                                    "cpu": 2,
+                                    "memoryInGB": 4
                                 }
                             }
                         }
