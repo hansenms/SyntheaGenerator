@@ -31,7 +31,8 @@
             "type": "int",
             "metadata": {
                 "description": "Number of Patients to Generate"
-            }
+            },
+            "defaultValue": 100
         },
         "FhirServerUrl": {
             "type": "string",
