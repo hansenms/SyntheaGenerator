@@ -96,6 +96,43 @@ namespace FhirAADUploader
                     {
                         string entry_json = (((JObject)entries[i])["resource"]).ToString();
                         string resource_type = (string)(((JObject)entries[i])["resource"]["resourceType"]);
+                        string id = (string)(((JObject)entries[i])["resource"]["id"]);
+
+                        //Rewrite subject reference
+                        if (((JObject)entries[i])["resource"]["subject"] != null) {
+                            string subject_reference = (string)(((JObject)entries[i])["resource"]["subject"]["reference"]);
+                            if (!String.IsNullOrEmpty(subject_reference)) 
+                            {
+                                for (int j = 0; j < entries.Count; j++)
+                                {
+                                    if ((string)(((JObject)entries[j])["fullUrl"]) == subject_reference) 
+                                    {
+                                        subject_reference = (string)(((JObject)entries[j])["resource"]["resourceType"]) + "/" + (string)(((JObject)entries[j])["resource"]["id"]);
+                                        break;
+                                    }
+                                }
+                            }
+                            ((JObject)entries[i])["resource"]["subject"]["reference"] = subject_reference;
+                            entry_json = (((JObject)entries[i])["resource"]).ToString();
+                        }
+
+                        if (((JObject)entries[i])["resource"]["context"] != null) 
+                        {
+                            string context_reference = (string)(((JObject)entries[i])["resource"]["context"]["reference"]);
+                            if (!String.IsNullOrEmpty(context_reference)) 
+                            {
+                                for (int j = 0; j < entries.Count; j++)
+                                {
+                                    if ((string)(((JObject)entries[j])["fullUrl"]) == context_reference) 
+                                    {
+                                        context_reference = (string)(((JObject)entries[j])["resource"]["resourceType"]) + "/" + (string)(((JObject)entries[j])["resource"]["id"]);
+                                        break;
+                                    }
+                                }
+                            }
+                            ((JObject)entries[i])["resource"]["context"]["reference"] = context_reference;
+                            entry_json = (((JObject)entries[i])["resource"]).ToString();
+                        }
 
                         using (var client = new HttpClient())
                         {
@@ -106,18 +143,28 @@ namespace FhirAADUploader
 
                             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + authResult.AccessToken);
                             StringContent content = new StringContent(entry_json, Encoding.UTF8, "application/json");
-                            var postresult = await client.PostAsync($"/{resource_type}", content);
-                            if (!postresult.IsSuccessStatusCode)
+
+                            HttpResponseMessage uploadResult = null;
+                            
+
+                            if (String.IsNullOrEmpty(id)) 
                             {
-                                string resultContent = await postresult.Content.ReadAsStringAsync();
+                                uploadResult = await client.PostAsync($"/{resource_type}", content);
+                            } 
+                            else 
+                            {
+                                uploadResult = await client.PutAsync($"/{resource_type}/{id}", content);
+                            }
+
+                            if (!uploadResult.IsSuccessStatusCode)
+                            {
+                                string resultContent = await uploadResult.Content.ReadAsStringAsync();
                                 Console.WriteLine(resultContent);
                             }
                         }
                     }
                 }
             }
-
-
         }
 
         private static void PrintUsage()
