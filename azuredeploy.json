@@ -34,6 +34,13 @@
             },
             "defaultValue": 100
         },
+        "AdditionalSyntheaArgs": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Additional Syntea args, e.g., '-a 0-18'"
+            }
+        },
         "FhirServerUrl": {
             "type": "string",
             "metadata": {
@@ -83,6 +90,10 @@
                                 {
                                     "name": "NUMBER_OF_PATIENTS",
                                     "value": "[parameters('NumberOfPatients')]"
+                                },
+                                {
+                                    "name": "ADDITIONAL_SYNTHEA_ARGS",
+                                    "value": "[parameters('AdditionalSyntheaArgs')]"
                                 },
                                 {
                                     "name": "FHIR_SERVER_URL",
