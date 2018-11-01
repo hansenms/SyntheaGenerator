@@ -64,8 +64,9 @@ namespace FhirAADUploader
             }
 
             authContext = new AuthenticationContext(Configuration["AzureAD_Authority"]);
-
             ClientCredential clientCredential = new ClientCredential(Configuration["AzureAD_ClientId"], Configuration["AzureAD_ClientSecret"]); ;
+            var client = new HttpClient();
+            client.BaseAddress = new Uri(fhirServerUrl);
 
             AuthenticationResult authResult = null;
             try
@@ -134,33 +135,30 @@ namespace FhirAADUploader
                             entry_json = (((JObject)entries[i])["resource"]).ToString();
                         }
 
-                        using (var client = new HttpClient())
+                        
+                            
+                        //If we already have a token, we should get the cached one, otherwise, refresh
+                        authResult = authContext.AcquireTokenAsync(Configuration["AzureAD_Audience"], clientCredential).Result;
+                        client.DefaultRequestHeaders.Clear();
+                        client.DefaultRequestHeaders.Add("Authorization", "Bearer " + authResult.AccessToken);
+                        StringContent content = new StringContent(entry_json, Encoding.UTF8, "application/json");
+
+                        HttpResponseMessage uploadResult = null;
+                        
+
+                        if (String.IsNullOrEmpty(id)) 
                         {
-                            client.BaseAddress = new Uri(fhirServerUrl);
-                            
-                            //If we already have a token, we should get the cached one, otherwise, refresh
-                            authResult = authContext.AcquireTokenAsync(Configuration["AzureAD_Audience"], clientCredential).Result;
+                            uploadResult = await client.PostAsync($"/{resource_type}", content);
+                        } 
+                        else 
+                        {
+                            uploadResult = await client.PutAsync($"/{resource_type}/{id}", content);
+                        }
 
-                            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + authResult.AccessToken);
-                            StringContent content = new StringContent(entry_json, Encoding.UTF8, "application/json");
-
-                            HttpResponseMessage uploadResult = null;
-                            
-
-                            if (String.IsNullOrEmpty(id)) 
-                            {
-                                uploadResult = await client.PostAsync($"/{resource_type}", content);
-                            } 
-                            else 
-                            {
-                                uploadResult = await client.PutAsync($"/{resource_type}/{id}", content);
-                            }
-
-                            if (!uploadResult.IsSuccessStatusCode)
-                            {
-                                string resultContent = await uploadResult.Content.ReadAsStringAsync();
-                                Console.WriteLine(resultContent);
-                            }
+                        if (!uploadResult.IsSuccessStatusCode)
+                        {
+                            string resultContent = await uploadResult.Content.ReadAsStringAsync();
+                            Console.WriteLine(resultContent);
                         }
                     }
                 }
